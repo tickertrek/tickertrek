@@ -1,0 +1,32 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.tickertrek.dao;
+
+
+import com.bullfinder.exception.BullFinderException;
+import com.tickertrek.jpa.entity.Order;
+import com.tickertrek.jpa.entity.Strategy;
+import com.tickertrek.jpa.entity.Trade;
+import com.tickertrek.jpa.entity.UserProfile;
+import org.json.JSONObject;
+
+/**
+ *
+ * @author Uttam
+ */
+public interface OrderDAO extends BaseDAO{
+
+    
+    public Order getOrder(String orderid)throws Exception;
+    
+    public JSONObject getOrders(String strategyID, String sortOrder, String sortName, int page, int rp) throws Exception;
+    public JSONObject getFollowedOrders(String userID, String sortOrder, String sortName, int page, int rp) throws Exception;
+    
+    public Trade getTrade(String tradeID)throws Exception;
+    public JSONObject getTrades(String strategyID, String sortOrder, String sortName, int page, int rp, boolean closeTrades) throws Exception;
+    public int getOpenTradeCount(String strategyID, String symbol, String ex) throws BullFinderException;
+
+}

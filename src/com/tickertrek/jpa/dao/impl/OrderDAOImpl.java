@@ -1,0 +1,282 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.tickertrek.jpa.dao.impl;
+
+import com.bullfinder.exception.BullFinderException;
+import com.tickertrek.dao.OrderDAO;
+import com.tickertrek.jpa.entity.TradeOrder;
+import com.tickertrek.jpa.entity.StrategyUserProfile;
+import com.tickertrek.jpa.entity.Trade;
+import com.tickertrek.jpa.util.JPAUtil;
+import com.tickertrek.util.Constants;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+/**
+ *
+ * @author Uttam
+ */
+public class OrderDAOImpl extends BaseDAOImpl implements OrderDAO {
+    @Override
+    public TradeOrder getOrder(String orderID)throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            TradeOrder order = em.find(TradeOrder.class, orderID);
+            return order;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public void persistOrder(TradeOrder o) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            em.persist(o);
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public List<Object> getOrders(String strategyID, String sortOrder, String sortName, int page, int rp) throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select o from com.tickertrek.jpa.entity.TradeOrder o " +
+              "where o.strategyid =:sid  AND o.initiatetime is not null ORDER BY o.initiatetime desc");
+           // query.setParameter("t",new Date());
+            query.setParameter("sid",strategyID);
+            
+            List<Object> orders = query.getResultList();
+            System.out.println("Size of Order list:"+orders.size());
+            return orders;
+            /*JSONArray orderList = new JSONArray();
+            int startIndex = (page-1)*rp;
+            int stopIndex = startIndex+rp < orders.size() ? startIndex+rp-1 : orders.size()-1;
+            for(int i = startIndex; i <=stopIndex; i++)
+               orderList.put(JPAUtil.getJSON(orders.get(i)));
+            
+            JSONObject reply = new JSONObject();
+            reply.put("rows", orderList);
+            reply.put("page", page);
+            reply.put("rp", rp);
+            return reply;*/
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public List<TradeOrder> getOpenOrders() throws BullFinderException{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select o from com.tickertrek.jpa.entity.TradeOrder o " +
+              "where o.status =:status ");
+           // query.setParameter("t",new Date());
+            query.setParameter("status",Constants.OrderConst.ORDER_PROCESSING);
+            
+            return  query.getResultList();
+            
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public List<Object> getFollowedOrders(String userID, String sortOrder, String sortName, int page, int rp) throws Exception{
+         EntityManager em = null;
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select o from com.tickertrek.jpa.entity.StrategyUserProfile o " +
+              "where o.userid =:u");
+            query.setParameter("u",userID);
+            
+            List<StrategyUserProfile> sup = query.getResultList();
+            
+            String where = this.getORString("o.strategyid", sup.size());
+            //if(!where.isEmpty()) where += (" AND  o.initiatetime is not null  ORDER BY o.initiatetime desc");
+            //else where += (" where o.initiatetime is not null ORDER BY o.initiatetime desc");
+            query = em.createQuery("select o from com.tickertrek.jpa.entity.TradeOrder o "
+               + where);// +);
+           
+            System.out.println("size of sup:" + sup.size());
+            //query.setParameter("sid",sup);
+            for(int i = 0; i < sup.size(); i++){
+                query.setParameter("p"+i,sup.get(i).getStrategyid());
+                System.out.println("sup:"+sup.get(i).getStrategyid());
+            }
+            return query.getResultList();
+            
+           // for(int i = 0; i < sup.size(); i++)
+           //     query.setParameter("s",sup.get(i).getStrategyid());
+           /* 
+            List<TradeOrder> orders = query.getResultList();
+            JSONArray orderList = new JSONArray();
+            int startIndex = (page-1)*rp;
+            int stopIndex = startIndex+rp < orders.size() ? startIndex+rp-1 : orders.size()-1;
+            for(int i = startIndex; i <=stopIndex; i++)
+               orderList.put(JPAUtil.getJSON(orders.get(i)));
+            
+            JSONObject reply = new JSONObject();
+            reply.put("orders", orderList);
+            reply.put("page", page);
+            reply.put("rp", rp);
+            return reply;*/
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public Trade getTrade(String tradeID)throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Trade trade = em.find(Trade.class, tradeID);
+            return trade;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public List<Object> getTrades(String strategyID, String sortOrder, String sortName, int page, int rp, boolean closeTrades) throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select t from com.tickertrek.jpa.entity.Trade t " +
+              "where t.strategyid =:s AND t.tradetype =:status AND t.opendate is not null ORDER by t.opendate desc");// ORDER BY "+sortName);
+            query.setParameter("s",strategyID);
+            if(closeTrades)
+                query.setParameter("status",Constants.Trade.TRADE_CLOSE);
+            else
+                query.setParameter("status",Constants.Trade.TRADE_OPEN);
+            
+            return query.getResultList();
+            /*
+            List<Trade> trades = query.getResultList();
+            JSONArray tradeList = new JSONArray();
+            int startIndex = (page-1)*rp;
+            int stopIndex = startIndex+rp < trades.size() ? startIndex+rp-1 : trades.size()-1;
+            for(int i = startIndex; i <=stopIndex; i++)
+               tradeList.put(JPAUtil.getJSON(trades.get(i)));
+            
+            JSONObject reply = new JSONObject();
+            reply.put("trades", tradeList);
+            reply.put("page", page);
+            reply.put("rp", rp);
+            return reply;
+             * 
+             */
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public int getOpenTradeCount(String strategyID, String symbol, String ex) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select t from com.tickertrek.jpa.entity.Trade t " +
+              "where tstrategyid =:s AND t.symbol=:symbol AND t.exchange=:ex AND t.tradetype:=status");
+            query.setParameter("s",strategyID);
+            query.setParameter("symbol",symbol);
+            query.setParameter("ex",ex);
+            query.setParameter("status",Constants.Trade.TRADE_OPEN);
+            
+            List<Trade> trades = query.getResultList();
+            int count = 0;
+            for(Trade t : trades)
+                count += t.getQuantity();
+            return count;
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public List<Trade> getOpenTrades(String strategyID, String symbol, String exchange) throws BullFinderException{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select t from com.tickertrek.jpa.entity.Trade t " +
+              "where tstrategyid =:s AND t.symbol=:symbol AND t.exchange=:ex AND t.tradetype:=status");
+            query.setParameter("s",strategyID);
+            query.setParameter("symbol",symbol);
+            query.setParameter("ex",exchange);
+            query.setParameter("status",Constants.Trade.TRADE_OPEN);
+            
+            return query.getResultList();
+           
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new BullFinderException(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+   
+
+}

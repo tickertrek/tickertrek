@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="1.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
+  <!--persistence-unit name="TravelLog">
+		<class>com.amazon.aws.samplecode.travellog.entity.User</class>
+		<class>com.amazon.aws.samplecode.travellog.entity.Photo</class>
+		<class>com.amazon.aws.samplecode.travellog.entity.Journal</class>
+		<class>com.amazon.aws.samplecode.travellog.entity.Entry</class>
+	</persistence-unit-->
+  <persistence-unit name="RR">
+    <class>com.tickertrek.jpa.entity.BseNse</class>
+    <class>com.tickertrek.jpa.entity.Championship</class>
+    <class>com.tickertrek.jpa.entity.DiscussTopic</class>
+    <class>com.tickertrek.jpa.entity.Feedback</class>
+    <class>com.tickertrek.jpa.entity.ForgotPassword</class>
+    <class>com.tickertrek.jpa.entity.MonthlyReturn</class>
+    <class>com.tickertrek.jpa.entity.Registration</class>
+    <class>com.tickertrek.jpa.entity.Sector</class>
+    <class>com.tickertrek.jpa.entity.PublicStrategy</class>
+    <class>com.tickertrek.jpa.entity.Strategy</class>
+    <class>com.tickertrek.jpa.entity.StrategyStat</class>
+    <class>com.tickertrek.jpa.entity.TopicComment</class>
+    <class>com.tickertrek.jpa.entity.Trade</class>
+    <class>com.tickertrek.jpa.entity.Ts</class>
+    <class>com.tickertrek.jpa.entity.UserAuth</class>
+    <class>com.tickertrek.jpa.entity.PublicUserProfile</class>
+    <class>com.tickertrek.jpa.entity.UserProfile</class>
+    <class>com.tickertrek.jpa.entity.YearlyReturn</class>
+    <class>com.tickertrek.jpa.entity.StrategyUserProfile</class>
+    <class>com.tickertrek.jpa.entity.ChampUserProfile</class>
+    <class>com.tickertrek.jpa.entity.TradeOrder</class>
+  </persistence-unit>
+</persistence>

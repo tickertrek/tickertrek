@@ -1,0 +1,226 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.tickertrek.jpa.entity;
+
+import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+
+/**
+ *
+ * @author rajesroy
+ */
+@Entity
+public class UserProfile extends BaseEntity{
+    // a temporary var for migration should be removed later
+    Integer userid;
+    String  fullname;
+    String  email;
+    String  contactemail;
+    Integer assetclass;
+    Integer style;
+    Integer holdingperiod;
+    Integer experience;
+    String  aboutme;
+    String  profession;
+    String  nickname;
+    Integer championship;
+    Integer following;
+    Integer followers;
+    Integer sitescore;
+    Integer userrating;
+    Integer prizeearning;
+    Integer subscriptionearning;
+    
+<<<<<<< .mine
+    //@OneToOne(fetch=FetchType.LAZY, mappedBy = "user")
+    //UserAuth auth;
+=======
+    //@OneToOne(fetch=FetchType.LAZY)
+    //UserAuth auth;
+>>>>>>> .r313
+
+    public Integer getUserid() {
+        return userid;
+    }
+
+    public void setUserid(Integer userid) {
+        this.userid = userid;
+    }
+<<<<<<< .mine
+    /*public UserAuth getAuth() {
+        return auth;
+    }
+=======
+>>>>>>> .r313
+
+<<<<<<< .mine
+    public void setAuth(UserAuth auth) {
+        this.auth = auth;
+    }*/
+=======
+>>>>>>> .r313
+    
+    
+        
+    public UserProfile(){
+        //this.id = id;
+    }    
+    public UserProfile(String id){
+        this.id = id;
+    }    
+   
+    
+    public String getAboutme() {
+        return aboutme;
+    }
+
+    public void setAboutme(String aboutme) {
+        this.aboutme = aboutme;
+    }
+
+    public Integer getAssetclass() {
+        return assetclass;
+    }
+
+    public void setAssetclass(Integer assetclass) {
+        this.assetclass = assetclass;
+    }
+
+    public Integer getChampionship() {
+        return championship;
+    }
+
+    public void setChampionship(Integer championship) {
+        this.championship = championship;
+    }
+
+    public String getContactemail() {
+        return contactemail;
+    }
+
+    public void setContactemail(String contactemail) {
+        this.contactemail = contactemail;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Integer getExperience() {
+        return experience;
+    }
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
+
+    public Integer getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Integer followers) {
+        this.followers = followers;
+    }
+
+    public Integer getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Integer following) {
+        this.following = following;
+    }
+
+    public String getFullname() {
+        return fullname;
+    }
+
+    public void setFullname(String fullname) {
+        this.fullname = fullname;
+    }
+
+    public Integer getHoldingperiod() {
+        return holdingperiod;
+    }
+
+    public void setHoldingperiod(Integer holdingperiod) {
+        this.holdingperiod = holdingperiod;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public Integer getPrizeearning() {
+        return prizeearning;
+    }
+
+    public void setPrizeearning(Integer prizeearning) {
+        this.prizeearning = prizeearning;
+    }
+
+    public String getProfession() {
+        return profession;
+    }
+
+    public void setProfession(String profession) {
+        this.profession = profession;
+    }
+
+    public Integer getSitescore() {
+        return sitescore;
+    }
+
+    public void setSitescore(Integer sitescore) {
+        this.sitescore = sitescore;
+    }
+
+    public Integer getStyle() {
+        return style;
+    }
+
+    public void setStyle(Integer style) {
+        this.style = style;
+    }
+
+    public Integer getSubscriptionearning() {
+        return subscriptionearning;
+    }
+
+    public void setSubscriptionearning(Integer subscriptionearning) {
+        this.subscriptionearning = subscriptionearning;
+    }
+
+    public Integer getUserrating() {
+        return userrating;
+    }
+
+    public void setUserrating(Integer userrating) {
+        this.userrating = userrating;
+    }
+    
+<<<<<<< .mine
+    @Override
+    public String toString(){
+        return "email:"+email+", fullname:"+fullname;
+    }
+=======
+  /*   @Override
+    public String toString(){
+        return this.getId();
+    }*/
+>>>>>>> .r313
+    
+}

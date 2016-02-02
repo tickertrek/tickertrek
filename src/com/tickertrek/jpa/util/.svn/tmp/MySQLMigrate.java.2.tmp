@@ -1,0 +1,312 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.tickertrek.jpa.util;
+
+import com.tickertrek.jpa.dao.impl.BaseDAOImpl;
+import com.tickertrek.jpa.entity.BseNse;
+import com.tickertrek.jpa.entity.ChampUserProfile;
+import com.tickertrek.jpa.entity.Championship;
+import com.tickertrek.jpa.entity.MonthlyReturn;
+import com.tickertrek.jpa.entity.Order;
+import com.tickertrek.jpa.entity.Sector;
+import com.tickertrek.jpa.entity.Strategy;
+import com.tickertrek.jpa.entity.StrategyUserProfile;
+import com.tickertrek.jpa.entity.Trade;
+import com.tickertrek.jpa.entity.Ts;
+import com.tickertrek.jpa.entity.UserAuth;
+import com.tickertrek.jpa.entity.UserProfile;
+import com.tickertrek.jpa.entity.YearlyReturn;
+import java.beans.PropertyDescriptor;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+
+/**
+ *
+ * @author rajesroy
+ */
+public class MySQLMigrate {
+    private static Connection conn = null;
+    private static Statement stmt;
+    private static Hashtable<String, UserProfile> uProfiles = new Hashtable<String, UserProfile>();
+    private static Hashtable<String, Strategy> strat = new Hashtable<String, Strategy>();
+    private static Hashtable<String, Championship> champs = new Hashtable<String, Championship>();
+    private static BaseDAOImpl simpleDAO = new BaseDAOImpl();
+    public static void connect(){
+        try {
+            //Properties properties = new Properties();
+            //properties.load(new FileInputStream("/jdbc.properties"));
+            Class.forName("com.mysql.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/bullfinder",
+                    "root", "bullfinder");
+            stmt = conn.createStatement();
+        } catch (Exception exp) {
+            exp.printStackTrace();
+            System.exit(0);
+        }
+    }
+    public static void closeConnection(){
+        try {
+            stmt.close();
+            conn.close();
+        } catch (Exception exp){
+            exp.printStackTrace();
+            System.exit(1);
+        }
+    }
+    public static boolean executeSQL(String sql) throws Exception{
+        try{
+            return stmt.execute(sql);
+        }catch(Exception e){
+            System.out.println(sql);
+            e.printStackTrace();
+            throw e;
+        }
+    }
+    public static void main(String[] args) throws Exception {
+        connect();
+        simpleDAO.clearAllDomains();
+        convertUserAuth();
+        convertStrategyUserProfile();
+        
+        convertBseNse();
+        
+        convertChamp();
+        convertChampUserProfile();
+        
+        
+        //convertMYSQLtoSimpleDB();
+    }
+    public static void convertUserAuth()throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `user_auth`");
+         List<UserAuth> uas = new ArrayList<UserAuth>();   
+            while(rs.next()){
+                UserAuth ua = new UserAuth();
+                convertMYSQLtoSimpleDB(rs,ua);
+                simpleDAO.persistEntity(ua);
+                uas.add(ua);
+                
+             }
+            for(int i=0; i < uas.size();i++){
+                convertUserProfile( uas.get(i));
+                
+            }
+    }
+    public static void convertUserProfile(UserAuth user)throws Exception{
+        ResultSet rs = stmt.executeQuery("select * from `user_profile` where email='"+user.getEmail()+"'");
+        UserProfile u = new UserProfile();
+        if(rs.next()){
+            u = new UserProfile();
+            u.setId(user.getId());
+            convertMYSQLtoSimpleDB(rs, u);
+            simpleDAO.persistEntity(u);
+            uProfiles.put(u.getUserid(), u);
+            
+         }else{
+            System.out.println("User profile not found for email:"+user.getEmail());
+            System.exit(0);
+            
+        }
+        
+            
+            convertStrategy(u);
+            //simpleDAO.persistEntity(userProfiles.get(i));
+            
+           
+    }
+    public static void convertStrategy(UserProfile u)throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `strategy` where userid="+u.getUserid());
+         List<Strategy> strategies = new ArrayList<Strategy>();   
+         while(rs.next()){
+                Strategy s = new Strategy();
+               
+                convertMYSQLtoSimpleDB(rs,s);
+                 s.setUserid(u.getId());
+                simpleDAO.persistEntity(s);
+                strategies.add(s);
+                //System.out.println("Putting s for id:"+s.getStrategyid());
+                strat.put(s.getStrategyid()+"", s);
+                System.out.println("Strategy:"+JPAUtil.getJSON(s));
+                
+             }
+            for(int i=0; i < strategies.size();i++){
+                convertOrder( strategies.get(i));
+                //convertTrade(strategies.get(i));
+                //convertSector(strategies.get(i));
+                //convertTs(strategies.get(i));
+                //convertMonthlyReturn(strategies.get(i));
+                //convertYearlyReturn(strategies.get(i));
+            }
+    }
+    
+    public static void convertOrder(Strategy s)throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `order` where strategyid="+s.getStrategyid());
+            while(rs.next()){
+                Order o = new Order();
+               
+                convertMYSQLtoSimpleDB(rs,o);
+                 o.setStrategyid(s.getId());
+                simpleDAO.persistEntity(o);
+             }
+    }
+    public static void convertTrade(Strategy s)throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `trade` where strategyid="+s.getStrategyid());
+            while(rs.next()){
+                Trade o = new Trade();
+               
+                convertMYSQLtoSimpleDB(rs,o);
+                o.setStrategyid(s.getId());
+                simpleDAO.persistEntity(o);
+             }
+    }
+    public static void convertTs(Strategy s)throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `ts` where strategyid="+s.getStrategyid());
+            while(rs.next()){
+                Ts o = new Ts();
+                o.setStrategyid(s.getId());
+                convertMYSQLtoSimpleDB(rs,o);
+                o.setStrategyid(s.getId());
+                simpleDAO.persistEntity(o);
+             }
+    }
+    public static void convertSector(Strategy s)throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `sector` where strategyid="+s.getStrategyid());
+            while(rs.next()){
+                Sector o = new Sector();
+                o.setStrategyid(s.getId());
+                convertMYSQLtoSimpleDB(rs,o);
+                o.setStrategyid(s.getId());
+                simpleDAO.persistEntity(o);
+             }
+    }
+    public static void convertMonthlyReturn(Strategy s)throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `monthlyreturn` where strategyid="+s.getStrategyid());
+            while(rs.next()){
+                MonthlyReturn o = new MonthlyReturn();
+                o.setStrategyid(s.getId());
+                convertMYSQLtoSimpleDB(rs,o);
+                o.setStrategyid(s.getId());
+                simpleDAO.persistEntity(o);
+             }
+    }
+    public static void convertYearlyReturn(Strategy s)throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `yearlyreturn` where strategyid="+s.getStrategyid());
+            while(rs.next()){
+                YearlyReturn o = new YearlyReturn();
+                o.setStrategyid(s.getId());
+                convertMYSQLtoSimpleDB(rs,o);
+                o.setStrategyid(s.getId());
+                simpleDAO.persistEntity(o);
+             }
+    }
+    
+    public static void convertStrategyUserProfile()throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `following`");
+            while(rs.next()){
+                StrategyUserProfile o = new StrategyUserProfile();
+                if(strat.get(rs.getString("strategyid")) == null)
+                    System.out.println("Scould not find strategy in strat:"+rs.getString("strategyid"));
+                o.setStrategyid(strat.get(rs.getString("strategyid")).getId());
+                o.setUserid(uProfiles.get(rs.getString("userid")).getId());
+                o.setRelation(rs.getString("relation"));
+                simpleDAO.persistEntity(o);
+             }
+    }
+    
+    public static void convertChampUserProfile()throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `participation`");
+            while(rs.next()){
+                ChampUserProfile o = new ChampUserProfile();
+                if(champs.get(rs.getString("championshipid")) == null)
+                System.out.println("Couldnot found champ:"+rs.getString("championshipid"));
+                o.setChampionshipid(champs.get(rs.getString("championshipid")).getId());
+                o.setUserid(uProfiles.get(rs.getString("userid")).getId());
+                o.setStrategyid(strat.get(rs.getString("strategyid")).getId());
+                o.setPosition(new Integer(rs.getInt("position")));
+                o.setOverallreturn(rs.getDouble("overallreturn"));
+                o.setNickname(rs.getString("nickname"));
+                simpleDAO.persistEntity(o);
+             }
+    }
+    
+    
+    public static void convertBseNse()throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `bse_nse`");
+         int i = 0;
+            while(rs.next() && i < 100){
+                i++;
+                BseNse ua = new BseNse();
+                
+                convertMYSQLtoSimpleDB(rs,ua);
+               
+                simpleDAO.persistEntity(ua);
+             }
+    }
+    
+    public static void convertChamp()throws Exception{
+         ResultSet rs = stmt.executeQuery("select * from `championship`");
+            while(rs.next()){
+                Championship ua = new Championship();
+                
+                convertMYSQLtoSimpleDB(rs,ua);
+                simpleDAO.persistEntity(ua);
+                //System.out.println("putting champ"+ua.getChampionshipid());
+                champs.put(ua.getChampionshipid(), ua);
+             }
+    }
+    
+    public static void convertMYSQLtoSimpleDB(ResultSet rs, Object o)throws Exception{
+        
+                for(int i = 1; i <= rs.getMetaData().getColumnCount(); i++){
+                    if(rs.getObject(i) == null){
+                        System.out.println("NULL value in "+rs.getMetaData().getColumnName(i));
+                        
+                    }else{
+                        try{
+                            PropertyDescriptor pd = new PropertyDescriptor(convertColumnName(rs.getMetaData().getColumnName(i)), o.getClass());
+                        
+                       // System.out.println(rs.getMetaData().getColumnName(i)+"::"+rs.getObject(i).getClass().getName()+"::"+pd.getPropertyType().getName());
+                        
+                        if(convertColumnName(rs.getMetaData().getColumnName(i)).equals("id"))
+                            JPAUtil.setField(o, convertColumnName(rs.getMetaData().getColumnName(i)), rs.getString(i));
+                         
+                        else if(pd.getPropertyType().getName().equals("java.lang.Integer") ){
+                            JPAUtil.setField(o, rs.getMetaData().getColumnName(i), new Integer(rs.getInt(i)));
+                            //PropertyDescriptor pd = new PropertyDescriptor(convertColumnName(rs.getMetaData().getColumnName(i)), o.getClass());
+                            //pd.getWriteMethod().invoke(o,new Integer(rs.getInt(i)));
+                        }
+                        else if( pd.getPropertyType().getName().equals("java.util.Date"))
+                            JPAUtil.setField(o, convertColumnName(rs.getMetaData().getColumnName(i)), (Date)rs.getDate(i) );
+                        else if( pd.getPropertyType().getName().equals("java.lang.Double"))
+                            JPAUtil.setField(o, convertColumnName(rs.getMetaData().getColumnName(i)), (Double)rs.getDouble(i) );
+                                 else if( pd.getPropertyType().getName().equals("java.lang.Double"))
+                            JPAUtil.setField(o, convertColumnName(rs.getMetaData().getColumnName(i)), (Double)rs.getDouble(i) );
+                       
+                        else if( pd.getPropertyType().getName().equals("java.lang.String"))
+                            JPAUtil.setField(o, convertColumnName(rs.getMetaData().getColumnName(i)), rs.getString(i));
+                        }catch(Exception e){
+                            System.out.println("No field exist: "+rs.getMetaData().getColumnName(i));
+                        }
+                    }
+                }
+               // System.out.println(JPAUtil.getJSON(o));
+                //simpleDAO.persistEntity(o);
+
+            
+        
+    }
+    
+    
+    public static String convertColumnName(String str){
+        //if(str.equals("userid") ||  str.equals("strategyid") ) return "id";
+         return str;
+    }
+
+}

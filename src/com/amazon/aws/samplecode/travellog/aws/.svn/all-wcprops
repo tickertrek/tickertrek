@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/aws
+END
+S3StorageManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/aws/S3StorageManager.java
+END
+TravelLogStorageObject.java
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/aws/TravelLogStorageObject.java
+END
+S3PhotoUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/aws/S3PhotoUtil.java
+END
+TravelLogSNSManager.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/aws/TravelLogSNSManager.java
+END

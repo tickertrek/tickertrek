@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/tickertrek/!svn/ver/416/LibTickerTrek/src/com/tickertrek/jpa/util
+END
+AwsCredentials.properties
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/tickertrek/!svn/ver/397/LibTickerTrek/src/com/tickertrek/jpa/util/AwsCredentials.properties
+END
+JPAUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/tickertrek/!svn/ver/394/LibTickerTrek/src/com/tickertrek/jpa/util/JPAUtil.java
+END
+MySQLMigrate.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/tickertrek/!svn/ver/416/LibTickerTrek/src/com/tickertrek/jpa/util/MySQLMigrate.java
+END

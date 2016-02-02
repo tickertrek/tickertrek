@@ -1,0 +1,97 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.tickertrek.jpa.util;
+
+<<<<<<< .mine
+=======
+
+>>>>>>> .r324
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.util.Date;
+import java.util.Random;
+<<<<<<< .mine
+import org.json.JSONObject;
+=======
+import org.json.JSONObject;
+import com.tickertrek.util.Constants;
+>>>>>>> .r324
+
+/**
+ *
+ * @author rajesroy
+ */
+public class JPAUtil {
+    // Return a JSONObject with all fields
+    public static JSONObject getJSON(Object o) throws Exception{
+        
+        JSONObject json = new JSONObject();
+        
+        for (PropertyDescriptor pd : Introspector.getBeanInfo(o.getClass()).getPropertyDescriptors()) {
+          if (pd.getReadMethod() != null && !"class".equals(pd.getName()) && pd.getReadMethod().invoke(o)!=null){
+              { System.out.println(pd.getName()+pd.getReadMethod().invoke(o));
+             // if(pd.getPropertyType().getName().equals("java.lang.Double"))
+               //   json.put(pd.getName(),  Constants.decimalFormatter.format(pd.getReadMethod().invoke(o)));
+              //else
+              json.put(pd.getName(), pd.getReadMethod().invoke(o));}
+               
+          }
+        }
+        
+        return json;
+        
+    }
+    // Return a JSON Object with the specified fields...
+    public static JSONObject getJSON(Object o, String[] columns) throws Exception{
+        
+        
+        JSONObject json = new JSONObject();
+        for (int i=0; i < columns.length;i ++) {
+              json.put(columns[i],  new PropertyDescriptor(columns[i], o.getClass()).getReadMethod().invoke(o));
+          
+        }
+        
+        return json;
+        
+    }
+    
+    // Return a JSON Object with the specified fields...
+    public static void setField(Object o, String field, Object value) throws Exception{
+        try{
+        PropertyDescriptor pd = new PropertyDescriptor(field, o.getClass());
+        if(pd.getWriteMethod() !=null)
+        pd.getWriteMethod().invoke(o,value);
+        else System.out.println("No method found for: "+field);
+        }catch(Exception e){
+            System.out.println("No field found for: "+field);
+        }
+       
+    }
+    
+    // Set dummy data for all vars except id
+    public static Object setDummyData(Object o) throws Exception{
+        Random gen = new Random();
+        for (PropertyDescriptor pd : Introspector.getBeanInfo(o.getClass()).getPropertyDescriptors()) {
+          if (pd.getWriteMethod() != null && !"class".equals(pd.getName())){
+              if(pd.getPropertyType() == Integer.class)
+                pd.getWriteMethod().invoke(o, new Integer(gen.nextInt(1000)));
+              else if(pd.getPropertyType() ==  Date.class)
+                pd.getWriteMethod().invoke(o, new Date());
+              else if(pd.getPropertyType() ==  Double.class)
+                pd.getWriteMethod().invoke(o, new Double(gen.nextDouble()));
+              else if(pd.getPropertyType() ==  Double.class)
+                pd.getWriteMethod().invoke(o, new Double(gen.nextDouble()));
+              else if(pd.getPropertyType() ==  String.class && !pd.getName().equals("id"))
+                pd.getWriteMethod().invoke(o, new String("dummy_"+gen.nextInt(10)));
+              
+              
+            //System.out.println(pd.getName());
+          }
+        }
+       return o; 
+    }
+    
+    
+}

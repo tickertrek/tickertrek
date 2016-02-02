@@ -1,0 +1,396 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.tickertrek.jpa.dao.impl;
+
+
+import com.bullfinder.exception.BullFinderException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import javax.persistence.EntityManagerFactory;
+import com.spaceprogram.simplejpa.EntityManagerFactoryImpl;
+import com.tickertrek.dao.BaseDAO;
+import com.tickertrek.dao.PublicDataHandleDAO;
+import com.tickertrek.jpa.entity.ChampUserProfile;
+import com.tickertrek.jpa.entity.Strategy;
+import com.tickertrek.jpa.entity.TagAssociation;
+import com.tickertrek.jpa.entity.TagUpdate;
+import com.tickertrek.jpa.entity.TradeOrder;
+import com.tickertrek.jpa.util.JPAUtil;
+import com.tickertrek.util.Constants;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+import javax.persistence.Query;
+import javax.persistence.EntityManager;
+import javax.servlet.ServletContext;
+import org.json.JSONObject;
+
+/**
+ *
+ * @author Uttam
+ */
+public class BaseDAOImpl implements BaseDAO{
+
+    static{
+        intializeEntityManager();
+    }
+    private static final Logger logger = Logger.getLogger(BaseDAOImpl.class.getName());
+    public static EntityManagerFactory factory;
+
+    private static void intializeEntityManager(){
+        Properties awsProps = new Properties();
+
+        try {
+            awsProps.load(BaseDAOImpl.class.getResourceAsStream("/AwsCredentials.properties"));
+            Map<String,String> props = new HashMap<String,String>();
+            props.put("secretKey", awsProps.getProperty("secretKey"));
+            props.put("accessKey", awsProps.getProperty("accessKey"));
+            factory = new EntityManagerFactoryImpl("dev", props);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private static Set<String> getLibPaths(ServletContext servletContext) {
+        String basePath = servletContext.getRealPath("");
+        Set<String> libPathsLocked = servletContext.getResourcePaths("/WEB-INF/lib");
+        Set<String> libPaths = new HashSet<String>();
+        if(libPathsLocked != null){
+            for (String s : libPathsLocked) {
+                // need to prefix with full path
+                libPaths.add(basePath + s);
+            }
+        }
+        String path = servletContext.getRealPath("/WEB-INF/classes");
+        if (path != null) {
+            File fp = new File(path);
+            if (fp.exists()) libPaths.add(path);
+        }
+        return libPaths;
+    }
+    public static void intializeEntityManagerInWebApp(ServletContext servletContext){
+        Properties awsProps = new Properties();
+
+        try {
+            awsProps.load(BaseDAOImpl.class.getResourceAsStream("/AwsCredentials.properties"));
+            Map<String,String> props = new HashMap<String,String>();
+            props.put("secretKey", awsProps.getProperty("secretKey"));
+            props.put("accessKey", awsProps.getProperty("accessKey"));
+            factory = new EntityManagerFactoryImpl("dev", props, getLibPaths(servletContext));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected static EntityManagerFactory getEntityManager(){
+        if(factory == null)
+            intializeEntityManager();
+        return factory;
+    }
+    protected BullFinderException createCustomizedException(Exception exp){
+        if(exp instanceof BullFinderException)
+            return (BullFinderException)exp;
+        else return new BullFinderException(exp, Constants.ExceptionCode.
+                BULLFINDER_GENERIC_ERROR, exp.getMessage());
+    }
+
+    protected Date getCurrentDateInFormat(){
+        Date currentDate = new Date(System.currentTimeMillis());
+
+        return currentDate;
+    }
+    protected Date formatDateBack(Date date){
+        return date;
+    }
+    
+    
+
+    public static void main(String args[])throws Exception{
+        System.out.println("Initialized entity manager factory.");
+
+        EntityManager em = factory.createEntityManager();
+        
+        /*Query query = em.createQuery("select c from com.tickertrek.jpa.entity.ChampUserProfile c " +
+              "where c.championshipid =:cid AND c.position > :p order by c.position asc");
+        String champid = "f4e21890-87f2-402c-b494-60ef11c73d54";
+        query.setParameter("cid",champid);
+        query.setParameter("p",0);
+        //Query setMaxResults = query.setMaxResults(10);
+        List<ChampUserProfile> champs = query.getResultList();
+        int count = 10;
+        for(ChampUserProfile c : champs){
+            if(count == 0)
+                    break;
+            System.out.println("c:"+c.getNickname()+", position:"+c.getPosition());
+            count --;
+        }*/
+        String strategyId = "27b73a42-3df7-494a-8271-03addb9086bd";
+
+        PublicDataHandleDAOImpl pdhd = new PublicDataHandleDAOImpl();
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.HOUR_OF_DAY, -2);
+
+
+        System.out.println("return array:"+pdhd.getUpdatesAfterTime(strategyId, cal.getTime(), 10));
+
+        //System.out.println("output:"+pdhd.getTSDataLineChart(strategyId));
+
+        
+        /*TagUpdate comment = new TagUpdate();
+
+        comment.setUpdateValue("This is another string comment to another strategy");
+        comment.setUpdateType(String.class.toString());
+        comment.setUpdateDate(new Date());
+        comment.setUpdatedById("userid2");
+        comment.setUpdatedByUName("nickname2");
+        comment.setExpired(0);
+
+        em.persist(comment);
+
+        TagAssociation assoc = new TagAssociation();
+        assoc.setUpdateId(comment.getId());
+        assoc.setUpdateTime(comment.getUpdateDate());
+        assoc.setTagId(strategyId);
+        assoc.setTagType(Strategy.class.toString());
+
+        em.persist(assoc);
+
+        System.out.println("First set of objects comment:"+comment
+                +"\nassociation:"+assoc);
+
+
+        TagUpdate comment1 = new TagUpdate();
+        JSONObject obj = new JSONObject();
+        obj.put("name", "starting_user");
+        obj.put("level", "Beginner");
+
+        comment1.setUpdateValue(obj.toString());
+        comment1.setUpdateType(JSONObject.class.toString());
+        comment1.setUpdateDate(new Date());
+        comment1.setUpdatedById("userid2");
+        comment1.setUpdatedByUName("nickname2");
+        comment1.setExpired(0);
+
+        em.persist(comment1);
+
+        TagAssociation assoc1 = new TagAssociation();
+        assoc1.setUpdateId(comment1.getId());
+        assoc1.setUpdateTime(comment1.getUpdateDate());
+        assoc1.setTagId(strategyId);
+        assoc1.setTagType(Strategy.class.toString());
+
+        em.persist(assoc1);
+
+        System.out.println("Second set of objects comment:"+comment1
+                +"\nassociation:"+assoc1);
+
+        JSONObject obj1 = new JSONObject(comment1.getUpdateValue().toString());
+
+        System.out.println("new JSONObject:"+obj1);
+
+        /*TradeOrder o = new TradeOrder();
+        o = (TradeOrder)JPAUtil.setDummyData(o);
+        em.persist(o);
+        
+
+        /*UserProfile profile = new UserProfile();
+        JPAUtil.setDummyData(profile);
+        profile.setEmail("bullfinder12345@gmail.com");
+        System.out.println("UserProfile before persistance:"+JPAUtil.getJSON(profile));
+        UserAuth user = new UserAuth();
+        JPAUtil.setDummyData(user);
+        em.persist(profile);
+        System.out.println("UserProfile after persistance:"+JPAUtil.getJSON(profile));
+        */
+        
+        
+        /*
+        Query query = em.createQuery("select p from com.tickertrek.jpa.entity.PublicUserProfile p where p.email=:email");
+        query.setParameter("email", "dummyemail1@gmail.com");
+
+        List<UserProfile> profiles = query.getResultList();
+        
+        
+        
+        String[] c = {"password"};
+        for(UserProfile p : profiles){
+            //System.out.println("inside last query:"+JPAUtil.getJSON(p));
+            query = em.createQuery("select u from com.tickertrek.jpa.entity.UserAuth u where u.id = :p");
+            query.setParameter("p", p.getId());
+            List<UserAuth> a = query.getResultList();
+            
+            query = em.createQuery("select s from com.tickertrek.jpa.entity.Strategy s where s.userid = :s");
+            query.setParameter("s", p.getId());
+            List<Strategy> s = query.getResultList();
+            
+            
+            System.out.println("Printing data :");
+            System.out.println("Profile:" + JPAUtil.getJSON(p));
+            System.out.println("UserAuth:  "+JPAUtil.getJSON(a.get(0)));
+            OrderDAOImpl odi = new OrderDAOImpl();
+            for(Strategy st : s){
+                System.out.println("Strategy:  "+JPAUtil.getJSON(st));
+                JSONObject reply = odi.getOrders(st.getId(), "desc", "initiatetime", 1, 20);
+                JSONArray orders = reply.getJSONArray("orders");
+                for(int i=0;i < orders.length();i++  )
+                    System.out.println("TradeOrder:  "+orders.get(i));
+            }
+        
+            //System.out.println(profile);
+            //System.out.println(auth);
+        }
+
+        /*List<UserProfile> profiles = query.getResultList();
+        System.out.println("Printing the userprofiles, count:"+profiles.size());
+        //System.out.println("profile 1:"+auths.get(0));
+        for(UserProfile profile : profiles){
+            System.out.println(profile);
+        }*/
+
+
+        /*EntityManagerFactory emf = getEntityManager();
+        Strategy s = new Strategy();
+        // Set dummy data for all vars except id
+        JPAUtil.setDummyData(s);
+        EntityManager em =  emf.createEntityManager();
+        em.persist(s);*/
+
+        em.clear();
+        factory.close();
+        
+    }
+    
+    @Override
+    public void clearAllDomains() throws BullFinderException {
+        EntityManager em = null;
+        String domains[] = {"PublicUserProfile","UserAuth","Strategy","Championship", "ChampUserProfile","StrategyUserProfile",
+                                "MonthlyReturn", "YearlyReturn","Sector","Ts"};
+        try {
+            em = factory.createEntityManager();
+            for(int i =0 ; i < domains.length ; i++){
+                System.out.println("Trying to delete entity:"+domains[i]);
+                String q = "select o from com.tickertrek.jpa.entity." + domains[i] + " o";
+                Query query = em.createQuery(q);
+                //query.executeUpdate();
+                List<Object> list = query.getResultList();
+                for(Object obj : list)
+                    em.remove(obj);
+                
+            }
+           
+           
+        }catch(Exception e){
+            e.printStackTrace();
+            
+        
+        }finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public void persistEntity(Object e) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            em.persist(e);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public <T> T getEntity(Class<T> tClass, String key) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            T o = em.find(tClass, key);
+            return o;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public <T> void deleteEntity(Class<T> tClass, String key) throws BullFinderException{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            T o = em.find(tClass, key);
+            em.remove(o);
+            return;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+        
+    }
+    
+    
+    public String getORString(String field,int count){
+        String s = "";
+        if(count > 0)
+            s = " where  "+field +"=:p0";
+        for(int i=1;i< count; i++)
+            s += (" OR "+field+"=:p"+i);
+        //if(!s.isEmpty()) s+= " ";
+        return s;
+    }
+    
+
+    static protected int getMonthFromDate(Date dt) throws Exception{
+        if(dt == null)
+            return -1;
+        SimpleDateFormat sdf = new SimpleDateFormat("MM");
+        return Integer.parseInt(sdf.format(dt));
+    }
+    static protected int getYearFromDate(Date dt) throws Exception{
+        if(dt == null)
+            return -1;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+        return Integer.parseInt(sdf.format(dt));
+    }
+    protected Object convertToAttribubteType(Class entity, String attributeName, String value){
+
+        if(attributeName == null || attributeName.trim().length() == 0
+                || entity == null)
+            return value;
+        try {
+            for (PropertyDescriptor pd : Introspector.getBeanInfo(entity).getPropertyDescriptors()) {
+                if(attributeName.equals(pd.getName())){
+                    if(pd.getPropertyType() == Integer.class)
+                        return Integer.parseInt(value);
+                      else if(pd.getPropertyType() ==  Double.class)
+                        return Double.parseDouble(value);
+                }
+            }
+        }catch(Exception exp){
+            exp.printStackTrace();
+            return value;
+        }
+        return value;
+    }
+
+}

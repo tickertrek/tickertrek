@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/tickertrek/!svn/ver/383/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/web
+END
+TravelLogController.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/tickertrek/!svn/ver/383/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/web/TravelLogController.java
+END
+TravelLogInitializer.java
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/tickertrek/!svn/ver/383/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/web/TravelLogInitializer.java
+END
+AjaxController.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/web/AjaxController.java
+END
+SpringAuthenticator.java
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/web/SpringAuthenticator.java
+END

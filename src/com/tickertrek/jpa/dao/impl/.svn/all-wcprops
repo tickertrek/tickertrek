@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/tickertrek/!svn/ver/416/LibTickerTrek/src/com/tickertrek/jpa/dao/impl
+END
+BaseDAOImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/tickertrek/!svn/ver/416/LibTickerTrek/src/com/tickertrek/jpa/dao/impl/BaseDAOImpl.java
+END
+OrderDAOImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/tickertrek/!svn/ver/416/LibTickerTrek/src/com/tickertrek/jpa/dao/impl/OrderDAOImpl.java
+END
+StrategyDAOImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/tickertrek/!svn/ver/410/LibTickerTrek/src/com/tickertrek/jpa/dao/impl/StrategyDAOImpl.java
+END
+PublicDataHandleDAOImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/tickertrek/!svn/ver/416/LibTickerTrek/src/com/tickertrek/jpa/dao/impl/PublicDataHandleDAOImpl.java
+END
+UserCommonActionDAOImpl.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/tickertrek/!svn/ver/408/LibTickerTrek/src/com/tickertrek/jpa/dao/impl/UserCommonActionDAOImpl.java
+END

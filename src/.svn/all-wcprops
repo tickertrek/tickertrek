@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/tickertrek/!svn/ver/416/LibTickerTrek/src
+END
+SimpleDBSample.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/SimpleDBSample.java
+END
+AwsCredentials.properties
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/tickertrek/!svn/ver/309/LibTickerTrek/src/AwsCredentials.properties
+END
+jdbc.properties
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/tickertrek/!svn/ver/310/LibTickerTrek/src/jdbc.properties
+END
+log4j.xml
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/log4j.xml
+END

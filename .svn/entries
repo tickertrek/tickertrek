@@ -1,0 +1,52 @@
+10
+
+dir
+419
+http://169.237.7.31/svn/tickertrek/LibTickerTrek
+http://169.237.7.31/svn/tickertrek
+
+
+
+2011-11-08T09:52:43.781250Z
+416
+rajesh
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+b77cb52d-2852-4eb3-8797-0c25c1eac958
+
+${dist
+dir
+
+lib
+dir
+
+nbproject
+dir
+
+src
+dir
+
+build.xml
+file
+
+
+
+
+
+b616c30fab72686e67c48d0bb5c924e4
+2011-10-31T23:57:22.671875Z
+372
+rajesh
+

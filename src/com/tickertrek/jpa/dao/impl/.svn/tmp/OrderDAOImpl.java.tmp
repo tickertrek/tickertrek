@@ -1,0 +1,191 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.tickertrek.jpa.dao.impl;
+
+import com.bullfinder.exception.BullFinderException;
+import com.tickertrek.dao.OrderDAO;
+import com.tickertrek.jpa.entity.Order;
+import com.tickertrek.jpa.entity.Strategy;
+import com.tickertrek.jpa.entity.StrategyUserProfile;
+import com.tickertrek.jpa.entity.Trade;
+import com.tickertrek.jpa.entity.UserProfile;
+import com.tickertrek.jpa.util.JPAUtil;
+import com.tickertrek.util.Constants;
+import java.util.Date;
+import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+/**
+ *
+ * @author Uttam
+ */
+public class OrderDAOImpl extends BaseDAOImpl implements OrderDAO {
+    @Override
+    public Order getOrder(String orderID)throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Order order = em.find(Order.class, orderID);
+            return order;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public JSONObject getOrders(String strategyID, String sortOrder, String sortName, int page, int rp) throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select o from com.tickertrek.jpa.entity.Order o " +
+              "where o.strategyid =:sid  AND `initiatetime` is not null ORDER BY `"+sortName + "` "+ sortOrder);
+           // query.setParameter("t",new Date());
+            query.setParameter("sid",strategyID);
+            
+            List<Order> orders = query.getResultList();
+            JSONArray orderList = new JSONArray();
+            int startIndex = (page-1)*rp;
+            int stopIndex = startIndex+rp < orders.size() ? startIndex+rp-1 : orders.size()-1;
+            for(int i = startIndex; i <=stopIndex; i++)
+               orderList.put(JPAUtil.getJSON(orders.get(i)));
+            
+            JSONObject reply = new JSONObject();
+            reply.put("orders", orderList);
+            reply.put("page", page);
+            reply.put("rp", rp);
+            return reply;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public JSONObject getFollowedOrders(String userID, String sortOrder, String sortName, int page, int rp) throws Exception{
+         EntityManager em = null;
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select o from com.tickertrek.jpa.entity.StrategyUserProfile o " +
+              "where o.userid =:u");
+            query.setParameter("u",userID);
+            
+            List<StrategyUserProfile> sup = query.getResultList();
+            
+            
+            query = em.createQuery("select o from com.tickertrek.jpa.entity.Order o " +
+              "where o.strategyid IN (:s)  ORDER BY "+sortName);
+            
+            for(int i = 0; i < sup.size(); i++)
+                query.setParameter("s",sup.get(i).getStrategyid());
+            
+            List<Order> orders = query.getResultList();
+            JSONArray orderList = new JSONArray();
+            int startIndex = (page-1)*rp;
+            int stopIndex = startIndex+rp < orders.size() ? startIndex+rp-1 : orders.size()-1;
+            for(int i = startIndex; i <=stopIndex; i++)
+               orderList.put(JPAUtil.getJSON(orders.get(i)));
+            
+            JSONObject reply = new JSONObject();
+            reply.put("orders", orderList);
+            reply.put("page", page);
+            reply.put("rp", rp);
+            return reply;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public Trade getTrade(String tradeID)throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Trade trade = em.find(Trade.class, tradeID);
+            return trade;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public JSONObject getTrades(String strategyID, String sortOrder, String sortName, int page, int rp, boolean closeTrades) throws Exception{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select t from com.tickertrek.jpa.entity.Trade t " +
+              "where t.strategyid =:s AND t.status:=status ORDER BY "+sortName);
+            query.setParameter("s",strategyID);
+            if(closeTrades)
+                query.setParameter("status",Constants.Trade.TRADE_CLOSE);
+            else
+                query.setParameter("status",Constants.Trade.TRADE_OPEN);
+            
+            List<Trade> trades = query.getResultList();
+            JSONArray tradeList = new JSONArray();
+            int startIndex = (page-1)*rp;
+            int stopIndex = startIndex+rp < trades.size() ? startIndex+rp-1 : trades.size()-1;
+            for(int i = startIndex; i <=stopIndex; i++)
+               tradeList.put(JPAUtil.getJSON(trades.get(i)));
+            
+            JSONObject reply = new JSONObject();
+            reply.put("trades", tradeList);
+            reply.put("page", page);
+            reply.put("rp", rp);
+            return reply;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public int getOpenTradeCount(String strategyID, String symbol, String ex) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select t from com.tickertrek.jpa.entity.Trade t " +
+              "where tstrategyid =:s AND t.symbol=:symbol AND t.exchange=:ex AND t.status:=status");
+            query.setParameter("s",strategyID);
+            query.setParameter("symbol",symbol);
+            query.setParameter("ex",ex);
+            query.setParameter("status",Constants.Trade.TRADE_OPEN);
+            
+            List<Trade> trades = query.getResultList();
+            int count = 0;
+            for(Trade t : trades)
+                count += t.getQuantity();
+            return count;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+
+    public void persistEntity(Order newOrder) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+}

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/util
+END
+DataLoader.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/util/DataLoader.java
+END
+StageUtils.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/util/StageUtils.java
+END
+DataExtractor.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/util/DataExtractor.java
+END
+Configuration.java
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/util/Configuration.java
+END
+TravelLogFileUtil.java
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svn/tickertrek/!svn/ver/277/LibTickerTrek/src/com/amazon/aws/samplecode/travellog/util/TravelLogFileUtil.java
+END

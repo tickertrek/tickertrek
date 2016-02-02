@@ -1,0 +1,132 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.tickertrek.jpa.dao.impl;
+
+<<<<<<< .mine
+=======
+import com.bullfinder.exception.BullFinderException;
+>>>>>>> .r310
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import javax.persistence.EntityManagerFactory;
+import com.spaceprogram.simplejpa.EntityManagerFactoryImpl;
+<<<<<<< .mine
+import com.tickertrek.jpa.entity.UserAuth;
+import com.tickertrek.jpa.entity.UserProfile;
+import java.util.List;
+=======
+import com.tickertrek.jpa.entity.BaseEntity;
+import com.tickertrek.jpa.entity.Strategy;
+import com.tickertrek.jpa.util.JPAUtil;
+>>>>>>> .r310
+import java.util.logging.Logger;
+import javax.persistence.Query;
+import javax.persistence.EntityManager;
+
+/**
+ *
+ * @author Uttam
+ */
+public class BaseDAO {
+
+    static{
+        intializeEntityManager();
+    }
+    private static final Logger logger = Logger.getLogger(BaseDAO.class.getName());
+    public static EntityManagerFactory factory;
+
+    private static void intializeEntityManager(){
+        Properties awsProps = new Properties();
+
+        try {
+            awsProps.load(BaseDAO.class.getResourceAsStream("/AwsCredentials.properties"));
+            Map<String,String> props = new HashMap<String,String>();
+            props.put("secretKey", awsProps.getProperty("secretKey"));
+            props.put("accessKey", awsProps.getProperty("accessKey"));
+            factory = new EntityManagerFactoryImpl("t2_dev", props);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected static EntityManagerFactory getEntityManager(){
+        if(factory == null)
+            intializeEntityManager();
+        return factory;
+    }
+    
+    public void persistEntity(BaseEntity entity) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            em.persist(entity);
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+
+
+    public static void main(String args[])throws Exception{
+        System.out.println("Initialized entity manager factory.");
+
+        EntityManager em = factory.createEntityManager();
+
+        /*UserProfile profile = new UserProfile();
+
+        UserAuth user = new UserAuth();
+
+        user.setEmail("bullfinder1@gmail.com");
+        user.setPassword("password");
+
+        profile.setAboutme("About me");
+        profile.setAssetclass(0);
+        //profile.setAuth(user);
+        profile.setEmail("bullfinder1@gmail.com");
+        profile.setFullname("Full Name");
+        profile.setNickname("nick_name");
+
+        user.setUser(profile);
+
+        em.persist(profile);
+        em.persist(user);*/
+
+        
+        Query query = em.createQuery("select p from UserAuth p where p.email = :email");
+        query.setParameter("email", "bullfinder1@gmail.com");
+
+        List<UserAuth> auths = query.getResultList();
+        System.out.println("Printing the userauths, count:"+auths.size());
+        UserProfile profile;
+        for(UserAuth auth : auths){
+            profile = auth.getUser();
+            System.out.println(profile);
+            System.out.println(auth);
+        }
+
+        /*List<UserProfile> profiles = query.getResultList();
+        System.out.println("Printing the userprofiles, count:"+profiles.size());
+        //System.out.println("profile 1:"+auths.get(0));
+        for(UserProfile profile : profiles){
+            System.out.println(profile);
+        }*/
+
+
+        em.clear();
+        factory.close();
+        EntityManagerFactory emf = getEntityManager();
+        Strategy s = new Strategy();
+        // Set dummy data for all vars except id
+        JPAUtil.setDummyData(s);
+        EntityManager em =  emf.createEntityManager();
+        em.persist(s);
+    }
+
+}

@@ -1,0 +1,49 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.tickertrek.jpa.entity;
+
+<<<<<<< .mine
+import com.spaceprogram.simplejpa.model.IdedBase;
+import com.spaceprogram.simplejpa.model.IdedTimestampedBase;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+=======
+import com.spaceprogram.simplejpa.model.IdedBase;
+>>>>>>> .r313
+import java.io.Serializable;
+import javax.persistence.EntityListeners;
+import javax.persistence.MappedSuperclass;
+
+/**
+ *
+ * @author rajesroy
+ */
+@MappedSuperclass
+@EntityListeners({ModelListener.class})
+<<<<<<< .mine
+public abstract class BaseEntity extends IdedBase implements Serializable{
+/*	@Id
+=======
+public class BaseEntity  extends IdedBase implements Serializable{
+	/*@Id 
+>>>>>>> .r313
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@RemoteProperty
+	protected String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }*/
+    
+<<<<<<< .mine
+=======
+    */
+>>>>>>> .r313
+
+}

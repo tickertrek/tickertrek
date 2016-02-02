@@ -1,0 +1,400 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.tickertrek.jpa.dao.impl;
+
+import com.bullfinder.exception.BullFinderException;
+import com.tickertrek.dao.StrategyDAO;
+import com.tickertrek.jpa.entity.ChampUserProfile;
+import com.tickertrek.jpa.entity.Championship;
+import com.tickertrek.jpa.entity.Order;
+import com.tickertrek.jpa.entity.PublicStrategy;
+import com.tickertrek.jpa.entity.StrategyUserProfile;
+import com.tickertrek.jpa.entity.Strategy;
+import com.tickertrek.jpa.util.JPAUtil;
+import com.tickertrek.util.Constants;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.Query;
+import javax.persistence.EntityManager;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+/**
+ *
+ * @author Uttam
+ */
+public class StrategyDAOImpl extends BaseDAOImpl implements StrategyDAO {
+
+    @Override
+    public void setStrategy(Order o)throws BullFinderException{
+        o.setStrategy(this.getEntity(Strategy.class, o.getStrategyid()));
+    }
+    
+
+    @Override
+    public JSONObject getStrategyList(String userID) throws BullFinderException {
+         EntityManager em = null;
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select o from com.tickertrek.jpa.entity.StrategyUserProfile o " +
+              "where o.userid =:u");
+            query.setParameter("u",userID);
+            
+            List<StrategyUserProfile> sup = query.getResultList();
+            
+            
+            query = em.createQuery("select s from com.tickertrek.jpa.entity.Strategy s " +
+              "where o.strategyid IN (:s)");
+            
+            for(int i = 0; i < sup.size(); i++)
+                query.setParameter("s",sup.get(i).getStrategyid());
+            
+            List<Strategy> strategies = query.getResultList();
+            JSONObject strategyList = new JSONObject();
+            
+            for(int i = 0; i <strategies.size(); i++){
+                Strategy s = strategies.get(i);
+                JSONObject js = JPAUtil.getJSON(s);
+                js.put("relation", this.getRelationFromList(sup, s.getId()));
+               strategyList.put(s.getId(),js);
+            }
+            
+           
+            return strategyList;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    private String getRelationFromList(List<StrategyUserProfile> list, String strategyID){
+        for(int i =0 ; i < list.size();i++)
+            if(list.get(i).getStrategyid().equals(strategyID)) return list.get(i).getRelation(); 
+        return Constants.Strategy.PUBLIC+"";
+    }
+    
+
+    @Override
+    public Strategy getStrategy(String strategyID) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Strategy s = em.find(Strategy.class, strategyID);
+            return s;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+   
+   
+    
+    @Override
+    public Strategy getStrategyByName(String name) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select s from com.tickertrek.jpa.entity.Strategy s " +
+              "where s.strategyname=:name ");
+            query.setParameter("name",name);
+            return (Strategy)query.getSingleResult();
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public StrategyUserProfile getStrategyUserProfile(String userID, String strategyID) throws BullFinderException {
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select f from com.tickertrek.jpa.entity.StrategyUserProfile f " +
+              "where f.userid =: u AND f.strategyid =: s");
+            query.setParameter("u",userID);
+            query.setParameter("s",strategyID);
+            StrategyUserProfile r = (StrategyUserProfile)query.getSingleResult();
+            return r;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public int getRelation(String userID, String strategyID) throws BullFinderException {
+            return Integer.parseInt(this.getStrategyUserProfile(userID, strategyID).getRelation());
+       
+    }
+    
+    @Override
+    public void deleteAllRelations(String strategyID) throws BullFinderException{
+        EntityManager em = null;
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select o from com.tickertrek.jpa.entity.StrategyUserProfile o " +
+              "where o.strategyid =:u");
+            query.setParameter("u",strategyID);
+            
+            List<StrategyUserProfile> sup = query.getResultList();
+            for(StrategyUserProfile s : sup)
+                em.remove(s);
+            
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public Championship getChampionship(String championshipID) throws BullFinderException{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Championship c = em.find(Championship.class, championshipID);
+            return c;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public ChampUserProfile getChampUserProfile(String champID, String userID) throws BullFinderException{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select c from com.tickertrek.jpa.entity.ChampUserProfile c " +
+              "where c.championshipid =: cid AND c.userid =:uid");
+            
+            query.setParameter("cid",champID);
+            query.setParameter("uid",userID);
+            try{
+                return (ChampUserProfile)query.getSingleResult();
+            }catch(Exception e){
+                return null;
+            }
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    
+    @Override
+    public ChampUserProfile getChampUserProfile(String strategyID) throws BullFinderException{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select c from com.tickertrek.jpa.entity.ChampUserProfile c " +
+              "where c.strategyid =: sid");
+            
+            query.setParameter("sid",strategyID);
+            
+            try{
+                return (ChampUserProfile)query.getSingleResult();
+            }catch(Exception e){
+                return null;
+            }
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+    }
+    @Override
+    public JSONObject getChampionshipList()throws BullFinderException{
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select c from com.tickertrek.jpa.entity.Championship c " +
+              "where c.status =:s1 OR c.status =:s2");
+            query.setParameter("s1",Constants.Championship.ACTIVE);
+            query.setParameter("s2",Constants.Championship.ENDED);
+            
+            List<Championship> champs = query.getResultList();
+            JSONObject champList = new JSONObject();
+            
+            for(int i = 0; i <champs.size(); i++){
+                Championship c = champs.get(i);
+                JSONObject jc = JPAUtil.getJSON(c);
+                champList.put(c.getId(),jc);
+            }
+            return champList;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+
+    }
+    @Override
+    public JSONArray getChampionshipRanking(String champid, int count)throws BullFinderException{
+        //String query = "SELECT * FROM `participation` where championshipid="+champid+" ORDER BY `position` ASC LIMIT 5";
+        //return pdDAO.getChampionshipRanking(query);
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery("select c from com.tickertrek.jpa.entity.ChampUserProfile c " +
+              "where c.championshipid =: cid AND c.position !=:p");
+            query.setParameter("c1",champid);
+            query.setParameter("p",0);
+            Query setMaxResults = query.setMaxResults(count);
+            
+            List<ChampUserProfile> champs = setMaxResults.getResultList();
+            JSONArray cupList = new JSONArray();
+            for(ChampUserProfile c : champs)
+                cupList.put(JPAUtil.getJSON(c));
+            return cupList;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+
+    }
+    
+    
+    
+    
+    @Override
+    public JSONObject searchStrategy(String sortName, String sortOrder,int page, int rp,  JSONArray filterSet)
+            throws BullFinderException
+    {
+        List<String> fields = new ArrayList<String>();
+        fields.add("id");
+        String where = "WHERE `listingtype`=:"+Constants.Strategy.LISTING_PUBLIC;
+        //if ($query) $where = " WHERE $qtype LIKE '%$query%' ";
+        int fieldCount = 1;
+        String sql = "SELECT s from com.tickertrek.jpa.entity.PublicStrategy s";
+        for(int i=0;i<filterSet.length();i++ )
+         {
+            JSONObject f = filterSet.getJSONObject(i);
+
+            if(f.getInt("filtertype") != Constants.Filter.FILTER_BASIC_SEARCH)
+            {
+                //sql += ("," + f.getString("field"));
+                fields.add(f.getString("field"));
+                fieldCount++;
+            }
+            String condition ="";
+
+            if(f.getInt("filtertype") == Constants.Filter.FILTER_RANGE) // adavanced range filter
+                   condition = " s." + f.getString("field") + " >=: "
+                           +f.getString("min") + " AND s." + f.getString("field")
+                           +" <=: "+f.getString("max");
+            else if(f.getInt("filtertype") == Constants.Filter.FILTER_VALUE) // basic or advanced value filter
+               condition = " s." + f.getString("field") + " =: " + f.getString("value") + "";
+            else if(f.getInt("filtertype") == Constants.Filter.FILTER_BASIC_SEARCH)
+            { // basic search condition filter
+                if(Constants.Filter.FILTER_BASIC_TYPE1.equals(f.getString("field"))){
+                        if(Constants.Filter.FILTER_BASIC_MAX_PROFIT.equals(f.getString("value")))
+                        {
+                            sortName ="annualreturn";
+                            sortOrder = "desc";
+                        }else if(Constants.Filter.FILTER_BASIC_MOST_ACTIVE.equals(f.getString("value"))){
+                            sortName = "tradecount";
+                            sortOrder = "desc";
+                        }else if(Constants.Filter.FILTER_BASIC_TOP_LOOSER.equals(f.getString("value"))){
+                            sortName = "annualreturn";
+                            sortOrder = "asc";
+                        }
+                }else if(Constants.Filter.FILTER_BASIC_TYPE2.equals(f.getString("field")))
+                {
+                        if(Constants.Filter.FILTER_BASIC_LONG_TRACK.equals(f.getString("value"))) // long track record
+                        {
+                            condition = " s.age >: 90";
+                        }else if(Constants.Filter.FILTER_BASIC_FREE_TRIAL.equals(f.getString("value"))){ // offer free trial
+                            condition = " s.freetrial >: 0";
+                        }else if(Constants.Filter.FILTER_BASIC_PROFITABLE_THREE_MONTHS.equals(f.getString("value"))){ // profitable last 3 months
+                            condition = " s.3mreturn >: 0";
+                        }
+                }else if(f.getString("field").equals("bs-market"))
+                    condition = " s.market =: " + f.getString("value") + "";
+                else if(f.getString("field").equals("bs-instrument"))
+                    condition = " s.instrumentoptions =: " + f.getString("value") + "";
+            }
+
+
+            if(!where.equals("WHERE") && !condition.isEmpty())
+                condition = " AND "+condition;
+            where += condition;
+        }
+        if(where.equals("WHERE")) where = "";
+       
+        
+        //String countSql = "SELECT count(strategyid) FROM strategy" +" " + where;
+        //int total = strategySearchDAO.getJdbcTemplate().queryForInt(countSql);
+
+
+        String sort = "ORDER BY "+sortName +" "+sortOrder;
+        
+        //String start = ""+((Integer.parseInt(page)-1) * Integer.parseInt(rp));
+        //String limit = "LIMIT "+start+", "+ rp;
+        
+        sql += (" FROM strategy "+ where+" "+ sort+" ");//+ limit);
+
+        System.out.println("Query:" + sql);
+        //System.out.println("Countsql:" +countSql);
+        
+        
+        EntityManager em = null;
+
+        try {
+            em = factory.createEntityManager();
+            Query query = em.createQuery(sql);
+            //Query setMaxResults = query.setMaxResults(count);
+            
+            List<PublicStrategy> strategies = query.getResultList();
+            try{
+                JSONArray sList = JPAUtil.getFlexiGridFormat(strategies, fields);
+            }catch(Exception e){
+                e.printStackTrace();
+                throw new BullFinderException();
+            }
+            JSONObject reply = new JSONObject();
+            reply.put("page", page);
+            reply.put("total", 100);
+            return reply;
+        }
+        finally {
+            if (em!=null) {
+                em.close();
+            }
+        }
+        
+        
+        
+       
+                    
+    }
+   
+
+    
+
+}
